@@ -1,21 +1,40 @@
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useFonts } from 'expo-font'
+import { Inter_400Regular, Inter_500Medium } from '@expo-google-fonts/inter'
+import { Rajdhani_500Medium, Rajdhani_700Bold } from '@expo-google-fonts/rajdhani'
+import AppLoading from 'expo-app-loading'
+import { Background } from './src/components/Background'
+import { StatusBar } from 'react-native';
+import { Routes } from './src/routes';
+import { NavigationContainer } from '@react-navigation/native';
+import { theme } from './src/global/styles/theme';
+import { AuthProvider } from './src/context/auth';
 
 export default function App() {
+
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Rajdhani_500Medium,
+    Rajdhani_700Bold
+  })
+
+  if (!fontsLoaded) //expo install expo-app-loading
+    return <AppLoading />  //segura a tela de splash
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+
+    <Background>
+      <StatusBar barStyle="light-content"
+        backgroundColor={theme.colors.secondary100}
+        translucent
+      />
+      <AuthProvider>
+        <Routes />
+      </AuthProvider>
+    </Background>
+
+
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
