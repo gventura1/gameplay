@@ -6,7 +6,6 @@ import AppLoading from 'expo-app-loading'
 import { Background } from './src/components/Background'
 import { StatusBar } from 'react-native';
 import { Routes } from './src/routes';
-import { NavigationContainer } from '@react-navigation/native';
 import { theme } from './src/global/styles/theme';
 import { AuthProvider } from './src/context/auth';
 
@@ -33,8 +32,6 @@ export default function App() {
         <Routes />
       </AuthProvider>
     </Background>
-
-
   );
 }
 

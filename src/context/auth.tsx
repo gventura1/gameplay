@@ -1,11 +1,14 @@
-import React, { createContext, ReactNode, useState } from 'react'
+import React, { createContext, ReactNode, useState, useEffect } from 'react'
 import * as Auth from 'expo-auth-session'
+
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { COLLECTION_USER } from '../config/storage'
 
 import {
     SCOPE, CLIENT_ID,
     CDN_IMAGE,
     REDIRECT_URI,
-    RESPONSE_TYPE
+    RESPONSE_TYPE,
 } from '../config'
 
 import { api } from '../services/api'
@@ -40,7 +43,6 @@ type AuthorizationResponse = Auth.AuthSessionResult & {
 const AuthContext = createContext<AuthContextData>({} as AuthContextData)
 
 function AuthProvider({ children }: AuthProviderProp) {
-
     const [user, setUser] = useState<User>({} as User)
     const [loading, setLoading] = useState(false)
 
@@ -57,11 +59,13 @@ function AuthProvider({ children }: AuthProviderProp) {
                 const firstName = userInfo.data.username.split(' ')[0]
                 userInfo.data.avatar = `${CDN_IMAGE}/avatars/${userInfo.data.id}/${userInfo.data.avatar}.png`
 
-                setUser({
+                const userData = {
                     ...userInfo.data,
                     firstName,
                     token: params.access_token
-                })
+                }
+                await AsyncStorage.setItem(COLLECTION_USER, JSON.stringify(userData))
+                setUser(userData)
             }
         } catch {
             throw new Error('Não foi possivel autenticar')
@@ -70,6 +74,19 @@ function AuthProvider({ children }: AuthProviderProp) {
             setLoading(false)
         }
     }
+
+    useEffect(() => {
+        async function loadUser() {
+            const storagedUser = await AsyncStorage.getItem(COLLECTION_USER)
+
+            if (storagedUser) {
+                const userLogged = JSON.parse(storagedUser) as User
+                api.defaults.headers.authorization = `Bearer ${userLogged.token}`
+                setUser(userLogged)
+            }
+        }
+        loadUser()
+    }, [])
 
     return (
         <AuthContext.Provider value={{ user, signIn, loading }}>
